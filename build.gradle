@@ -99,7 +99,7 @@ testing {
 }
 
 changelog {
-    fromBase()
+    from '1.0'
     publishAll = false
 }
 
