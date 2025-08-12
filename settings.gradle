@@ -23,10 +23,10 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         register('libs') {
-            version 'gradle-gitversion', '3.0.0-beta.10'
+            version 'gradle-gitversion', '3.0.0-beta.11'
 
             plugin 'licenser',       'net.minecraftforge.licenser'    version '1.2.0'                // https://plugins.gradle.org/plugin/net.minecraftforge.licenser
-            plugin 'gradleutils',    'net.minecraftforge.gradleutils' version '3.0.0-beta.13'        // https://plugins.gradle.org/plugin/net.minecraftforge.gradleutils
+            plugin 'gradleutils',    'net.minecraftforge.gradleutils' version '3.0.0-beta.14'        // https://plugins.gradle.org/plugin/net.minecraftforge.gradleutils
             plugin 'gitversion',     'net.minecraftforge.gitversion'  versionRef 'gradle-gitversion' // https://plugins.gradle.org/plugin/net.minecraftforge.gitversion
             plugin 'changelog',      'net.minecraftforge.changelog'   versionRef 'gradle-gitversion' // https://plugins.gradle.org/plugin/net.minecraftforge.changelog
             plugin 'javadoc-links',  'io.freefair.javadoc-links'      version '8.14'                 // https://plugins.gradle.org/plugin/io.freefair.javadoc-links
