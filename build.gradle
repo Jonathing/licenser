@@ -1,4 +1,4 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.api.attributes.plugin.GradlePluginApiVersion
 import org.gradle.api.plugins.jvm.JvmTestSuite
 
 plugins {
@@ -8,23 +8,42 @@ plugins {
     id 'idea'
     id 'eclipse'
     id 'maven-publish'
-    id 'net.minecraftforge.licenser' version '1.1.1'
-    id 'net.minecraftforge.gradleutils' version '2.5.1'
-    id 'com.gradle.plugin-publish' version '1.3.1'
-    id 'com.gradleup.shadow' version '8.3.6'
+    alias libs.plugins.licenser
+    alias libs.plugins.gradleutils
+    alias libs.plugins.gitversion
+    alias libs.plugins.changelog
+    alias libs.plugins.plugin.publish
 }
 
 final projectDisplayName = 'Forge Licenser'
+final projectArtifactId = base.archivesName = 'licenser'
 description = 'A simple license header manager for Gradle - Fork of org.cadixdev.licenser'
 group = 'net.minecraftforge'
 version = gitversion.tagOffset
 
 println "Version: $version"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(8)
+    withSourcesJar()
+    withJavadocJar()
+}
 
-repositories {
-    gradlePluginPortal()
+configurations {
+    // Applies the "Gradle Plugin API Version" attribute to configuration
+    // This was added in Gradle 7, gives consumers useful errors if they are on an old version
+    def applyGradleVersionAttribute = { Configuration configuration ->
+        configuration.attributes {
+            attribute(GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE, objects.named(GradlePluginApiVersion, libs.versions.gradle.asProvider().get()))
+        }
+    }
+
+    named('runtimeElements', applyGradleVersionAttribute)
+}
+
+dependencies {
+    // Gradle API
+    compileOnly libs.bundles.gradle
 }
 
 license {
@@ -32,8 +51,21 @@ license {
     include '**/*.groovy'
 }
 
-javadoc.enabled = false
-groovydoc.use = true
+tasks.named('jar', Jar) {
+    archiveClassifier = 'thin'
+}
+
+tasks.withType(GroovyCompile).configureEach {
+    groovyOptions.optimizationOptions.indy = true
+}
+
+tasks.named('javadoc', Javadoc) {
+    enabled = false
+}
+
+tasks.named('groovydoc', Groovydoc) {
+    use = true
+}
 
 // javadocJar is created after evaluation, so we need to configure it here
 afterEvaluate {
@@ -44,30 +76,34 @@ afterEvaluate {
 }
 
 testing {
-    suites.configureEach { JvmTestSuite suite ->
+    def suiteSpec = { JvmTestSuite suite ->
         suite.dependencies {
             implementation.add project()
-            implementation.add gradleTestKit()
-            libs.bundles.spock.get().forEach { dependency ->
-                implementation.add dependency
-            }
+            implementation.add testLibs.gradle
+            compileOnly.add libs.nulls
+            implementation.bundle testLibs.bundles.spock
         }
 
-        suite.useJUnitJupiter(libs.junit.get().version)
+        suite.useJUnitJupiter(testLibs.versions.junit)
 
         suite.targets.configureEach {
             testTask.configure {
-                shouldRunAfter test
+                shouldRunAfter tasks.named('test')
             }
         }
     }
 
-    suites.named('test', JvmTestSuite)
-    suites.register('functionalTest', JvmTestSuite)
+    suites.named('test', JvmTestSuite, suiteSpec)
+    suites.register('functionalTest', JvmTestSuite, suiteSpec)
+}
+
+changelog {
+    fromBase()
+    publishAll = false
 }
 
 gradlePlugin {
-    testSourceSets sourceSets.functionalTest
+    testSourceSet sourceSets.functionalTest
 
     website = gitversion.url
     vcsUrl = gitversion.url + '.git'
@@ -81,35 +117,25 @@ gradlePlugin {
     }
 }
 
-tasks.named('jar', Jar) {
-    archiveClassifier = 'thin'
-}
-
-tasks.named('shadowJar', ShadowJar) {
-    enableRelocation = true
-    archiveClassifier = null
-    relocationPrefix = 'net.minecraftforge.licenser.shadow'
-}
-
 publishing {
     publications.register('pluginMaven', MavenPublication) {
+        artifactId = projectArtifactId
+        changelog.publish it
+
         pom { pom ->
-            artifactId = project.name
             name = projectDisplayName
             description = project.description
 
-            gradleutils.pom.gitHubDetails = pom
+            gradleutils.pom.addRemoteDetails(pom)
 
-            license gradleutils.pom.licenses.MIT
+            licenses {
+                license gradleutils.pom.licenses.MIT
+            }
         }
     }
 
     repositories {
-        // TODO [Licenser] Use publishing Forge maven?
-        maven {
-            name = 'localFolder'
-            url = 'file://' + file('build/repo').absolutePath
-        }
+        maven gradleutils.publishingForgeMaven
     }
 }
 
