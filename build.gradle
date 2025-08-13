@@ -26,7 +26,11 @@ println "Version: $version"
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(8)
     withSourcesJar()
-    withJavadocJar()
+
+    // TODO [Licenser][2.0] Re-enable with Licenser 2.0 when migrating public API from Groovy to Java
+    //  Gradle's Groovydoc task does not fork the JVM and uses the daemon JVM to run the Groovydoc ant task
+    //  This project is built with a version of Groovy so old that its Groovydoc runtime cannot handle Java 17, Gradle 9's minimum
+    //withJavadocJar()
 }
 
 configurations {
@@ -60,6 +64,7 @@ tasks.withType(GroovyCompile).configureEach {
     groovyOptions.optimizationOptions.indy = true
 }
 
+/*
 tasks.named('javadoc', Javadoc) {
     enabled = false
 }
@@ -75,6 +80,7 @@ afterEvaluate {
         from groovydoc.destinationDir
     }
 }
+ */
 
 testing {
     def suiteSpec = { JvmTestSuite suite ->
