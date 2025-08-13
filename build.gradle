@@ -98,6 +98,13 @@ testing {
                 shouldRunAfter tasks.named('test')
             }
         }
+
+        // Remove's Gradle's local test kit since we are supplying our own
+        afterEvaluate { project ->
+            project.configurations.named(suite.sources.implementationConfigurationName) {
+                dependencies.remove(project.dependencies.gradleTestKit())
+            }
+        }
     }
 
     suites.named('test', JvmTestSuite, suiteSpec)
