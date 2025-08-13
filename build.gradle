@@ -8,10 +8,10 @@ plugins {
     id 'idea'
     id 'eclipse'
     id 'maven-publish'
-    alias libs.plugins.licenser
     alias libs.plugins.gradleutils
     alias libs.plugins.gitversion
     alias libs.plugins.changelog
+    alias libs.plugins.licenser
     alias libs.plugins.plugin.publish
 }
 
@@ -38,7 +38,7 @@ configurations {
     // This was added in Gradle 7, gives consumers useful errors if they are on an old version
     def applyGradleVersionAttribute = { Configuration configuration ->
         configuration.attributes {
-            attribute(GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE, objects.named(GradlePluginApiVersion, libs.versions.gradle.asProvider().get()))
+            attribute(GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE, objects.named(GradlePluginApiVersion, libs.versions.gradle.get()))
         }
     }
 
@@ -46,8 +46,11 @@ configurations {
 }
 
 dependencies {
+    // Static Analysis
+    compileOnly libs.nulls
+
     // Gradle API
-    compileOnly libs.bundles.gradle
+    compileOnly libs.gradle
 }
 
 license {
@@ -154,3 +157,4 @@ publishing {
 }
 
 idea.module { downloadSources = downloadJavadoc = true }
+eclipse.classpath { downloadSources = downloadJavadoc = true }

@@ -8,7 +8,7 @@ pluginManagement {
 }
 
 plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0' // https://plugins.gradle.org/plugin/org.gradle.toolchains.foojay-resolver-convention
 }
 
 rootProject.name = 'licenser'
@@ -22,40 +22,40 @@ dependencyResolutionManagement {
     }
 
     versionCatalogs {
-        register('libs') {
-            version 'gradle-gitversion', '3.0.0-beta.11'
+        final gradle = '7.0.2'
 
-            plugin 'licenser',       'net.minecraftforge.licenser'    version '1.2.0'                // https://plugins.gradle.org/plugin/net.minecraftforge.licenser
-            plugin 'gradleutils',    'net.minecraftforge.gradleutils' version '3.0.0-beta.14'        // https://plugins.gradle.org/plugin/net.minecraftforge.gradleutils
-            plugin 'gitversion',     'net.minecraftforge.gitversion'  versionRef 'gradle-gitversion' // https://plugins.gradle.org/plugin/net.minecraftforge.gitversion
-            plugin 'changelog',      'net.minecraftforge.changelog'   versionRef 'gradle-gitversion' // https://plugins.gradle.org/plugin/net.minecraftforge.changelog
-            plugin 'javadoc-links',  'io.freefair.javadoc-links'      version '8.14'                 // https://plugins.gradle.org/plugin/io.freefair.javadoc-links
-            plugin 'plugin-publish', 'com.gradle.plugin-publish'      version '1.3.1'                // https://plugins.gradle.org/plugin/com.gradle.plugin-publish
-            plugin 'shadow',         'com.gradleup.shadow'            version '9.0.0-rc3'            // https://plugins.gradle.org/plugin/com.gradleup.shadow
+        register('libs') {
+            version 'gitversion-gradle', '3.0.0-beta.19'
+
+            plugin 'licenser',       'net.minecraftforge.licenser'    version '1.2.0'         // https://plugins.gradle.org/plugin/net.minecraftforge.licenser
+            plugin 'gradleutils',    'net.minecraftforge.gradleutils' version '3.0.0-beta.20' // https://plugins.gradle.org/plugin/net.minecraftforge.gradleutils
+            plugin 'gitversion',     'net.minecraftforge.gitversion'  version '3.0.0-beta.19' // https://plugins.gradle.org/plugin/net.minecraftforge.gitversion
+            plugin 'changelog',      'net.minecraftforge.changelog'   version '3.0.0-beta.19' // https://plugins.gradle.org/plugin/net.minecraftforge.changelog
+            plugin 'plugin-publish', 'com.gradle.plugin-publish'      version '1.3.1'         // https://plugins.gradle.org/plugin/com.gradle.plugin-publish
+
+            // Static Analysis
+            library 'nulls', 'org.jetbrains', 'annotations' version '26.0.2'
 
             // Gradle API
-            // TODO [ForgeGradle][FG7][Gradle Api] REMOVE once Gradle publish their own API artifacts
-            // Original:  https://github.com/remal-gradle-api/packages/packages/760197?version=7.0.2
-            // Mirror:    https://repos.moddinglegacy.com/#/modding-legacy/name/remal/gradle-api/gradle-api/7.0.2
-            version 'gradle', '7.0.2'
+            // Original: https://github.com/remal-gradle-api/packages/packages/760197?version=7.0.2
+            // Mirror:   https://repos.moddinglegacy.com/#/modding-legacy/name/remal/gradle-api/gradle-api/7.0.2
+            version 'gradle', gradle
             library 'gradle', 'name.remal.gradle-api', 'gradle-api'  versionRef 'gradle'
-            library 'nulls',  'org.jetbrains',         'annotations' version    '26.0.2'
-            bundle 'gradle', ['gradle', 'nulls']
         }
 
         register('testLibs') {
             // Gradle Test Kit
-            // TODO [ForgeGradle][FG7][Gradle Api] REMOVE once Gradle publish their own API artifacts
-            // Original:  https://github.com/remal-gradle-api/packages/packages/760199?version=7.0.2
-            // Mirror:    https://repos.moddinglegacy.com/#/modding-legacy/name/remal/gradle-api/gradle-test-kit/7.0.2
-            version 'gradle', '7.0.2'
-            library 'gradle', 'name.remal.gradle-api', 'gradle-test-kit' versionRef 'gradle'
+            // Original: https://github.com/remal-gradle-api/packages/packages/760199?version=7.0.2
+            // Mirror:   https://repos.moddinglegacy.com/#/modding-legacy/name/remal/gradle-api/gradle-test-kit/7.0.2
+            library 'gradle', 'name.remal.gradle-api', 'gradle-test-kit' version gradle
 
-            // Testing
+            // Spock
             version 'spock', '2.3-groovy-3.0'
             library 'spock-core',   'org.spockframework', 'spock-core'   versionRef 'spock'
             library 'spock-junit4', 'org.spockframework', 'spock-junit4' versionRef 'spock'
             bundle  'spock', ['spock-core', 'spock-junit4']
+
+            // JUnit (Dependency artifact managed by JvmTestSuite)
             version 'junit', '4.13.2'
         }
     }
